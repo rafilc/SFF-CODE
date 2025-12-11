@@ -1,4 +1,4 @@
-CARROT SEEDPACK
+SUGARCANE SEEDPACK
 
 extends StaticBody2D
 
@@ -46,3 +46,4 @@ func consume_seed():
 func deselect():
 	# stop following cursor
 	selected = false
+
