@@ -1,0 +1,52 @@
+WEATHER
+
+extends StaticBody2D
+
+var current_weather = "none"   # start with no rain
+
+
+func _ready():
+	current_weather = "none"
+	update_weather()
+	$rainmusic.stop()
+
+	# first rain will happen after 15 seconds
+	$Timer.wait_time = 15
+	$Timer.start()
+
+
+func _on_Timer_timeout():
+	# toggle weather
+	if current_weather == "none":
+		current_weather = "rain"
+		print("raining")
+
+		# New rain duration
+		$Timer.wait_time = rand_range(10, 30)
+
+		# Start rain SFX
+		$rainmusic.play()
+
+	elif current_weather == "rain":
+		current_weather = "none"
+		print("not raining")
+
+		# New clear-sky duration
+		$Timer.wait_time = rand_range(20, 60)
+
+		# Stop rain SFX
+		$rainmusic.stop()
+
+	# Restart timer
+	$Timer.start()
+
+
+func _process(delta):
+	Global.weather = current_weather
+	update_weather()
+
+
+func update_weather():
+	var raining = (current_weather == "rain")
+	$rain.visible = raining
+	$raincolor.visible = raining

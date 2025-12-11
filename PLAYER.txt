@@ -1,0 +1,63 @@
+PLAYER
+
+extends KinematicBody2D
+
+var SPEED = 50
+var motion = Vector2.ZERO
+
+onready var anim_sprite = $AnimatedSprite
+
+func _physics_process(delta):
+	# reset motion
+	motion = Vector2.ZERO
+
+	# get input direction
+	var input_dir = Vector2.ZERO
+
+	input_dir.x = (Input.get_action_strength("d") + Input.get_action_strength("rside")) \
+				- (Input.get_action_strength("a") + Input.get_action_strength("lside"))
+
+	input_dir.y = (Input.get_action_strength("s") + Input.get_action_strength("down")) \
+				- (Input.get_action_strength("w") + Input.get_action_strength("up"))
+
+	# apply movement if moving
+	if input_dir.length() > 0:
+		motion = input_dir.normalized() * SPEED
+
+	# update animation
+	_update_animation(motion)
+
+	# move character
+	motion = move_and_slide(motion)
+
+
+func _update_animation(velocity):
+	# no movement
+	if velocity.length() == 0:
+		anim_sprite.stop()
+		return
+
+	# horizontal movement
+	if abs(velocity.x) > abs(velocity.y):
+		anim_sprite.play("sidewalk")
+
+		# flip based on direction
+		if velocity.x > 0:
+			anim_sprite.flip_h = true
+		else:
+			anim_sprite.flip_h = false
+
+	# vertical movement
+	else:
+		anim_sprite.flip_h = false
+		if velocity.y > 0:
+			anim_sprite.play("downwalk")
+		else:
+			anim_sprite.play("upwalk")
+
+
+func player_sell_method():
+	pass
+
+func player_shop_method():
+	pass

@@ -1,0 +1,29 @@
+SHOP
+
+extends StaticBody2D
+
+func _ready():
+	# hide shopmenu on start
+	if has_node("shopmenu"):
+		$shopmenu.visible = false
+
+	# show sprite only when no weather effect
+	$AnimatedSprite.visible = (Global.weather == "none")
+
+
+func _process(delta):
+	# update visibility based on weather
+	$AnimatedSprite.visible = (Global.weather == "none")
+
+
+func _on_Area2D_body_entered(body):
+	# show shop when player enters
+	if body.has_method("player_shop_method"):
+		if has_node("shopmenu"):
+			$shopmenu.visible = true
+
+
+func _on_Area2D_body_exited(body):
+	# hide shop when player leaves
+	if has_node("shopmenu"):
+		$shopmenu.visible = false

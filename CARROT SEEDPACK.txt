@@ -1,0 +1,48 @@
+CARROT SEEDPACK
+
+extends StaticBody2D
+
+var selected = false
+var seed_type = 1
+var uses_left = 3
+
+func _ready():
+	# play default animation
+	if $AnimatedSprite:
+		$AnimatedSprite.play("default")
+
+func _on_Area2D_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.pressed:
+		# LEFT CLICK: select
+		if event.button_index == BUTTON_LEFT:
+			Global.plantselected = seed_type
+			Global.current_seedpack = self
+			selected = true
+
+		# RIGHT CLICK: deselect
+		elif event.button_index == BUTTON_RIGHT:
+			# only deselect if this is the current seedpack
+			if Global.current_seedpack == self:
+				Global.current_seedpack = null
+				Global.plantselected = 0  # or whatever you use for "no seed selected"
+			deselect()
+
+func _physics_process(delta):
+	# follow cursor when selected
+	if selected:
+		global_position = global_position.linear_interpolate(
+			get_global_mouse_position(), 
+			25 * delta
+		)
+
+func consume_seed():
+	# reduce uses and remove when finished
+	uses_left -= 1
+	if uses_left <= 0:
+		if Global.current_seedpack == self:
+			Global.current_seedpack = null
+		queue_free()
+
+func deselect():
+	# stop following cursor
+	selected = false

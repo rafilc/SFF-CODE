@@ -1,0 +1,54 @@
+INTRO STORY
+
+extends Control
+
+# Array of images and narration
+var images = [
+	preload("res://story1.png"),
+	preload("res://story2.png"),
+	preload("res://story3.png"),
+	preload("res://story4.png")
+]
+
+var narrations = [
+	"So... this is Grandma's farm. It's been a long time.",
+	"My dear Addy... if you've found my diary and you're reading this, the farm is yours now. \nTake care of it the way you take care of your dreams.",
+	"The fields are tired... but they're still alive. I can fix this.",
+	"I have to. Alright, Grandma. I'll bring the farm back.\n\nLet's start one seed at a time."
+	]
+
+var current_index = 0
+
+# References
+onready var texture_rect = $bg
+onready var label = $Label
+onready var ap = $AnimationPlayer
+
+func _ready():
+	update_sequence()
+
+func update_sequence():
+	# Godot 3 uses rect_size for Control nodes
+	texture_rect.rect_size = Vector2(1920, 1080)
+	texture_rect.rect_scale = Vector2(0.165, 0.168)
+
+	texture_rect.texture = images[current_index]
+	label.text = narrations[current_index]
+
+	ap.play("fade")
+
+func _on_next_pressed():
+	current_index += 1
+	if current_index < images.size():
+		update_sequence()
+	else:
+		ap.play("fade_out")
+
+func _input(event):
+	if event.is_action_pressed("click"):
+		_on_next_pressed()
+
+# AnimationPlayer signal (Godot 3)
+func _on_AnimationPlayer_animation_finished(anim_name):
+	if anim_name == "fade_out":
+		get_tree().change_scene("res://world.tscn")

@@ -1,0 +1,82 @@
+CRAFTING STATION
+
+extends StaticBody2D
+
+var CRAFT_JAM = 0     # id for jam craft
+var CRAFT_SUGAR = 1   # id for sugar craft
+
+var current_index := 0   # selected craft option
+
+onready var message_box = $message_box
+onready var icon = $message_box/icon
+onready var result = $message_box/result
+onready var x3_label = $message_box/x3
+onready var Lbutton = $message_box/Lbutton
+onready var Rbutton = $message_box/Rbutton
+onready var craft_button = $message_box/craft_button
+
+func _ready():
+	message_box.visible = false   # hide ui
+	Lbutton.connect("pressed", self, "_on_left")
+	Rbutton.connect("pressed", self, "_on_right")
+	# craft button connected in editor
+
+func _on_Area2D_body_entered(body):
+	if body.name == "player":
+		message_box.visible = true   # show ui
+		_update_display()
+
+func _on_Area2D_body_exited(body):
+	if body.name == "player":
+		message_box.visible = false  # hide ui
+
+func _on_left():
+	current_index -= 1
+	if current_index < 0:
+		current_index = 1
+	_update_display()
+
+func _on_right():
+	current_index += 1
+	if current_index > 1:
+		current_index = 0
+	_update_display()
+
+func _update_display():
+	# update icons
+	match current_index:
+		CRAFT_JAM:
+			icon.play("berry")
+			result.play("jam")
+			x3_label.text = "x1"
+		CRAFT_SUGAR:
+			icon.play("sugarcaane")
+			result.play("sugar")
+			x3_label.text = "x1"
+
+func _on_craft_button_pressed():
+	# crafting logic with ingredient check
+	match current_index:
+		CRAFT_JAM:
+			if Global.numofstrawberries < 1:
+				$message_box/Letscraft.text ="Need more berries!"
+				return
+			
+			# now requires AT LEAST 1 sugar
+			if Global.numofsugar < 1:
+				$message_box/Letscraft.text = "Need 1 sugar!"
+				return
+
+			Global.numofstrawberries -= 1
+			Global.numofsugar -= 1
+			Global.numofjam += 1
+
+		CRAFT_SUGAR:
+			if Global.numofcarrots < 1:
+				$message_box/Letscraft.text ="Need more cane!"
+				return
+			Global.numofcarrots -= 1
+			Global.numofsugar += 1
+			
+
+	_update_display()   # refresh ui
