@@ -1,0 +1,24 @@
+extends Control
+
+func _on_sg_pressed():
+	# play fade animation
+	$AnimationPlayer.play("fade")
+
+func _on_opt_pressed():
+	get_tree().change_scene("res://howtoplay.tscn")
+	
+
+	#quit game
+func _on_exit_pressed():
+	get_tree().quit()
+
+func _on_AnimationPlayer_animation_finished(anim_name):
+	# go to world scene after fade
+	get_tree().change_scene("res://intro_story.tscn")
+	
+func _on_credits_pressed():
+	get_tree().change_scene("res://credits.tscn")
+
+
+func _on_about_pressed():
+	get_tree().change_scene("res://about.tscn")

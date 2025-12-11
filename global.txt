@@ -1,0 +1,23 @@
+extends Node
+
+signal seed_planted(seed_type)
+
+var current_dragged_node: Node = null
+
+var plantselected = null
+var current_seedpack = null
+
+var numofcarrots = 0
+var numofstrawberries = 0
+
+var plant_was_planted = false
+var seed_is_hovering_zone = false
+
+var coins = 0
+var weather = "none"
+
+var numofsugarcane := 0
+var numofsugar := 0
+var numofjam := 0
+
+var day = 1

@@ -1,0 +1,110 @@
+extends StaticBody2D
+
+const item_berry = 1
+const item_carrot = 2
+const item_soil = 3
+
+const item_prices = {
+	item_berry: 10,
+	item_carrot: 10,
+	item_soil: 15
+}
+
+onready var berry_pack_scene = preload("res://strawberry_seedpack.tscn")
+onready var carrot_pack_scene = preload("res://carrot_seedpack.tscn")
+onready var soil_item_scene = preload("res://growingzone.tscn")
+
+onready var item_icon = $icon
+onready var buy_button = $buybutton
+onready var price_label = $pricelabel
+
+var world_node
+var farm_node
+var player
+var parent_node
+
+var current_item = item_berry
+var last_item = -1
+
+
+func _ready():
+	world_node = get_tree().get_root().get_node("world")
+	farm_node = world_node.get_node("farm")
+	player = farm_node.get_node("player")
+	
+	parent_node = world_node
+	update_icon()
+	update_ui()
+
+
+func _physics_process(delta):
+	if visible and current_item != last_item:
+		update_icon()
+	if visible:
+		update_ui()
+
+
+func update_icon():
+	last_item = current_item
+	if item_icon and item_icon.has_method("play"):
+		match current_item:
+			item_berry: item_icon.play("berryseed")
+			item_carrot: item_icon.play("carrotseed")
+			item_soil: item_icon.play("soil")
+	update_ui()
+
+
+func update_ui():
+	var price = item_prices[current_item]
+	price_label.text = str(price)
+	buy_button.disabled = Global.coins < price
+
+
+func _on_buttonleft_pressed():
+	_swap(-1)
+
+func _on_buttonright_pressed():
+	_swap(1)
+
+func _swap(dir):
+	current_item += dir
+	if current_item < item_berry:
+		current_item = item_soil
+	elif current_item > item_soil:
+		current_item = item_berry
+	update_icon()
+
+
+func _on_buybutton_pressed():
+	var price = item_prices[current_item]
+
+	print("Coins =", Global.coins, " Price =", price)
+
+	if Global.coins >= price:
+		buy_item(price)
+		$textlabel.text = "Purchased!"
+		print("yey")
+	else:
+		$textlabel.text = "Not enough money!"
+		print("no")
+
+
+
+
+
+func buy_item(price):
+	Global.coins -= price
+
+	var pack = null
+	match current_item:
+		item_berry: pack = berry_pack_scene.instance()
+		item_carrot: pack = carrot_pack_scene.instance()
+		item_soil: pack = soil_item_scene.instance()
+		
+
+	if pack == null:
+		return
+
+	pack.global_position = player.global_position + Vector2(32, 0)
+	parent_node.add_child(pack)
+	update_ui()

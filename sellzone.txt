@@ -1,0 +1,63 @@
+extends StaticBody2D
+
+var can_sell = true   # prevents double-selling
+
+# smooth fade-out for sounds
+func fade_out(audio, duration := 0.2):
+	if not audio.playing:
+		return
+	var start_volume = audio.volume_db
+	var steps = 12   # number of fade steps
+	for i in range(steps):
+		var t = float(i) / steps
+		audio.volume_db = lerp(start_volume, -40, t)   # lower volume gradually
+		yield(get_tree().create_timer(duration / steps), "timeout")
+	audio.stop()
+	audio.volume_db = start_volume   # reset for next play
+
+func _on_Area2D_body_entered(body):
+	if not can_sell:   # block repeated triggers
+		return
+
+	if body.has_method("player_sell_method"):   # only player can trigger
+		can_sell = false
+
+		var carrots = Global.numofcarrots
+		var strawberries = Global.numofstrawberries
+		var jam = Global.numofjam
+		var sugar = Global.numofsugar
+
+		if carrots == 0 and strawberries == 0 and jam == 0:   # empty inventory
+			$soldsfx.stop()
+			$nocroopssfx.stop()
+			$nocroopssfx.play()
+			$Label.text = "No crops!"
+			$Label.visible = true
+			$ColorRect.visible = true
+			return
+
+		# add coins
+		Global.coins += (carrots * 5) + (strawberries * 5) + (jam * 15)
+		Global.numofcarrots = 0
+		Global.numofstrawberries = 0
+		Global.numofsugar = 0
+		Global.numofjam = 0
+
+		$soldsfx.stop()
+		$nocroopssfx.stop()
+		$soldsfx.play()
+
+		$Label.text = "Crops sold!"
+		$Label.visible = true
+		$ColorRect.visible = true
+
+func _on_Area2D_body_exited(body):
+	can_sell = true   # allow next sell
+	$Label.visible = false
+	$ColorRect.visible = false
+
+	# fade out any playing sounds
+	if $soldsfx.playing:
+		fade_out($soldsfx, 0.2)
+	if $nocroopssfx.playing:
+		fade_out($nocroopssfx, 0.2)

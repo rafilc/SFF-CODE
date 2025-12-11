@@ -1,0 +1,47 @@
+extends StaticBody2D
+
+var selected = false    # true when player is holding this seed pack
+var seed_type = 2       # id for this seed type (2 = strawberry)
+var uses_left = 3       # how many seeds remain in this pack
+
+func _ready():
+	# play default animation for the seed pack
+	if $AnimatedSprite:
+		$AnimatedSprite.play("default")
+
+func _on_Area2D_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton and event.pressed:
+		# left click: pick up and equip this seed pack
+		if event.button_index == BUTTON_LEFT:
+			Global.plantselected = seed_type     # sets active seed type for planting
+			Global.current_seedpack = self       # this pack becomes the selected pack
+			selected = true                      # enables following the mouse
+
+		# right click: drop or cancel selection
+		elif event.button_index == BUTTON_RIGHT:
+			# only clear globals if this is the currently selected pack
+			if Global.current_seedpack == self:
+				Global.current_seedpack = null
+				Global.plantselected = 0   # clears active seed selection
+			deselect()
+
+func _physics_process(delta):
+	# if selected, move smoothly toward the mouse cursor
+	if selected:
+		global_position = global_position.linear_interpolate(
+			get_global_mouse_position(), 
+			25 * delta
+		)
+
+func consume_seed():
+	# subtract one use when planting a seed
+	uses_left -= 1
+	if uses_left <= 0:
+		# if this pack was active, clear it before destroying
+		if Global.current_seedpack == self:
+			Global.current_seedpack = null
+		queue_free()   # delete empty seed pack
+
+func deselect():
+	# stops the seed pack from following the cursor
+	selected = false
